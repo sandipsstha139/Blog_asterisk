@@ -1,7 +1,12 @@
 import { useFormik } from "formik";
 import { forgetSchema } from "../schemas";
+import ApiRequest from '../utils/apiRequest';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const ForgetPassword = () => {
+
+  const navigate = useNavigate();
   const initialValues = {
     email: "",
   };
@@ -17,9 +22,14 @@ const ForgetPassword = () => {
   } = useFormik({
     initialValues: initialValues,
     validationSchema: forgetSchema,
-    onSubmit: (values) => {
-      console.log(values);
-      resetForm();
+    onSubmit: async (values) => {
+      try {
+        const res = await ApiRequest.post("/user/forget", values);
+        navigate("/");
+        toast.success(res.data.message)
+      } catch (error) {
+        toast.error(error.response.data.message);
+      }
     },
   });
 

@@ -1,6 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { loginSchema } from "../schemas";
+import ApiRequest from '../utils/apiRequest';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -21,9 +23,14 @@ const Login = () => {
   } = useFormik({
     initialValues: initialValues,
     validationSchema: loginSchema,
-    onSubmit: (values) => {
-      console.log(values);
-      resetForm();
+    onSubmit: async (values) => {
+      try {
+        const req = await ApiRequest.post("/user/login", values);
+        navigate("/");
+        toast.success(req.data.message);
+      } catch (error) {
+        toast.error(error.response.data.message);
+      }
     },
   });
 

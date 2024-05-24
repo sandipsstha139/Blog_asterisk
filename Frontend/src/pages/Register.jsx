@@ -1,6 +1,9 @@
 import { useNavigate } from "react-router-dom";
 import { registerSchema } from "../schemas";
 import { useFormik } from "formik";
+import { useEffect } from 'react';
+import ApiRequest from '../utils/apiRequest';
+import { toast } from 'react-toastify';
 
 const Register = () => {
   const initialValues = {
@@ -17,14 +20,27 @@ const Register = () => {
     handleBlur,
     handleChange,
     handleSubmit,
-    resetForm,
   } = useFormik({
     initialValues: initialValues,
     validationSchema: registerSchema,
-    onSubmit: (values) => {
-      console.log(values);
-      resetForm();
+    onSubmit: async (values) => {
+      try {
+        const res = await ApiRequest.post("/user/register", values);
+        navigate("/login");
+        toast.success(res.data.message);
+      } catch (error) {
+        console.log(error);
+        toast.error(error.response.data.message);
+      }
     },
+  });
+
+  useEffect(()=> {
+    try {
+      
+    } catch (error) {
+      
+    }
   });
 
   const navigate = useNavigate();

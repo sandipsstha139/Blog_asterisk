@@ -18,7 +18,6 @@ export const forgetSchema = Yup.object({
 })
 
 export const resetSchema = Yup.object({
-    currentPassword:Yup.string().min(6).required("Please enter your Current Password!"),
-    newPassword:Yup.string().min(6).required("Please enter your New Password!"),
-    confirmPassword:Yup.string().required().oneOf([Yup.ref("newPassword"), null], "Password do not match!")
+    password:Yup.string().min(6).required("Please enter your New Password!"),
+    confirmPassword:Yup.string().required().oneOf([Yup.ref("password"), null], "Password do not match!")
 })

@@ -1,10 +1,14 @@
 import { useFormik } from "formik";
 import {  resetSchema } from "../schemas";
+import ApiRequest from '../utils/apiRequest';
+import { toast } from 'react-toastify';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const ResetPassword = () => {
+  const {token} = useParams();
+  const navigate = useNavigate();
   const initialValues = {
-    currentPassword: "",
-    newPassword: "",
+    password: "",
     confirmPassword: "",
   };
 
@@ -19,10 +23,19 @@ const ResetPassword = () => {
   } = useFormik({
     initialValues: initialValues,
     validationSchema: resetSchema,
-    onSubmit: (values) => {
-      console.log(values);
-      resetForm();
+    onSubmit: async (values) => {
+      try {
+        const res = await ApiRequest.post(`/user/password/reset/${token}`, {
+          password: values.password,
+        });
+        navigate("/home");
+        toast.success(res.data.message);
+      } catch (error) {
+        console.log(error);
+        toast.error(error.response.data.message);
+      }
     },
+    
   });
 
   return (
@@ -32,29 +45,18 @@ const ResetPassword = () => {
           Reset Password
         </h1>
         <form className="flex flex-col gap-6" onSubmit={handleSubmit}>
+          
           <input
             type="password"
-            placeholder="Current Password"
+            placeholder="Password"
             className="p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            name="currentPassword"
-            value={values.currentPassword}
+            name="password"
+            value={values.password}
             onChange={handleChange}
             onBlur={handleBlur}
           />
-          {errors.currentPassword && touched.currentPassword ? (
-            <p className="text-red-500 text-sm">{errors.currentPassword}</p>
-          ) : null}
-          <input
-            type="password"
-            placeholder="New Password"
-            className="p-3 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            name="newPassword"
-            value={values.newPassword}
-            onChange={handleChange}
-            onBlur={handleBlur}
-          />
-          {errors.newPassword && touched.newPassword ? (
-            <p className="text-red-500 text-sm">{errors.newPassword}</p>
+          {errors.password && touched.password ? (
+            <p className="text-red-500 text-sm">{errors.password}</p>
           ) : null}
           <input
             type="password"

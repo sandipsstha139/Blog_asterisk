@@ -6,7 +6,7 @@ const generateJsonWebToken = (id) => {
     });
   };
   
-const createSendToken = async (user, statusCode, res) => {
+const createSendToken =  (user,message, statusCode, res) => {
     const token = generateJsonWebToken(user.id);
     const cookieOptions = {
       expires: new Date(
@@ -21,6 +21,7 @@ const createSendToken = async (user, statusCode, res) => {
     res.status(statusCode).json({
       status: "success",
       token,
+      message,
       user,
     });
   };

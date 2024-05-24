@@ -2,10 +2,10 @@ import User from "../models/user.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
 import bcrypt from "bcrypt";
-import {sendEmail} from '../utils/sendEmail.js';
-import createSendToken from '../utils/token.js';
-
-
+import { sendEmail } from "../utils/sendEmail.js";
+import createSendToken from "../utils/token.js";
+import crypto from "crypto";
+import { Op } from "sequelize";
 
 export const registerUser = CatchAsync(async (req, res, next) => {
   const { username, email, password } = req.body;
@@ -18,11 +18,11 @@ export const registerUser = CatchAsync(async (req, res, next) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  console.log(hashedPassword)
+  console.log(hashedPassword);
   let user = await User.create({ username, email, password: hashedPassword });
   console.log(user);
 
-  await createSendToken(user, 201, res);
+  createSendToken(user, "User Registered Successfully", 201, res);
 });
 
 export const loginUser = CatchAsync(async (req, res, next) => {
@@ -38,7 +38,7 @@ export const loginUser = CatchAsync(async (req, res, next) => {
     return next(new AppError("Invalid credentials!", 404));
   }
 
-  await createSendToken(user, 200, res);
+  createSendToken(user, "User Logged In Successfully", 200, res);
 });
 
 export const forgetPassword = CatchAsync(async (req, res, next) => {
@@ -58,13 +58,13 @@ export const forgetPassword = CatchAsync(async (req, res, next) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: 'Reset Password',
+      subject: "Reset Password",
       message,
     });
 
     res.status(201).json({
       success: true,
-      message: `Email sent to ${user.email} successfully`,
+      message: `Email sent to sandipstha139@gmail.com successfully`,
     });
   } catch (err) {
     user.resetPasswordToken = undefined;
@@ -75,35 +75,78 @@ export const forgetPassword = CatchAsync(async (req, res, next) => {
   }
 });
 
+export const resetPassword = CatchAsync(async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
 
-export const getAllUser = CatchAsync(async(req, res, next)=> {
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  let user = await User.findOne({
+    where: {
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { [Op.gt]: Date.now() },
+    },
+  });
+
+  if (!user) {
+    return next(new AppError("Token Expired or Invalid!", 404));
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  user.password = hashedPassword;
+  user.resetPasswordToken = null;
+  user.resetPasswordExpires = null;
+
+  await user.save({ validate: true });
+
+  createSendToken(user, "Password Reset Successfully", 200, res);
+});
+
+export const getAllUser = CatchAsync(async (req, res, next) => {
   const users = await User.findAll();
 
   res.status(200).json({
     status: "success",
     results: users.length,
-    users
-  })
-})
+    users,
+  });
+});
 
-export const deleteUser = CatchAsync(async(req, res, next)=> {
-  const {id} = req.params;
-  await User.destroy({where: {id}});
+export const deleteUser = CatchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  await User.destroy({ where: { id } });
 
   res.status(200).json({
     status: "success",
-    message: "User deleted Successfully"
-  })
-})
+    message: "User deleted Successfully",
+  });
+});
 
-export const getUser = CatchAsync(async(req, res, next)=> {
-  const {id} = req.params;
-  const user = await User.findOne({where: {id}});
+export const logoutUser = CatchAsync(async (req, res, next) => {
+  res
+    .status(200)
+    .cookie("jwt", " ", {
+      httpOnly: true,
+      expires: new Date(Date.now()),
+    })
+    .json({
+      success: true,
+      message: "User Logged out Successfully!",
+    });
+});
 
+export const getUser = CatchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const user = await User.findOne({ where: { id } });
   res.status(200).json({
     status: "success",
     message: "User data fetched Successfully",
-    user
-  })
-})
+    user,
+  });
+});
 
+export const getMe = CatchAsync(async (req, res, next) => {
+  console.log(req.user);
+  req.params.id = req.user.dataValues.id;
+  next();
+});
