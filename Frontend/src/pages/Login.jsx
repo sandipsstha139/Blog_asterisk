@@ -1,11 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { loginSchema } from "../schemas";
-import ApiRequest from '../utils/apiRequest';
-import { toast } from 'react-toastify';
+import ApiRequest from "../utils/apiRequest";
+import { toast } from "react-toastify";
+import { useContext, useEffect } from "react";
+import { Context } from "../context/Context";
 
 const Login = () => {
   const navigate = useNavigate();
+
+  const { isAuthenticated, setIsAuthenticated } = useContext(Context);
 
   const initialValues = {
     email: "",
@@ -19,13 +23,13 @@ const Login = () => {
     handleBlur,
     handleChange,
     handleSubmit,
-    resetForm,
   } = useFormik({
     initialValues: initialValues,
     validationSchema: loginSchema,
     onSubmit: async (values) => {
       try {
         const req = await ApiRequest.post("/user/login", values);
+        setIsAuthenticated(true);
         navigate("/");
         toast.success(req.data.message);
       } catch (error) {
@@ -42,7 +46,20 @@ const Login = () => {
     navigate("/forget");
   };
 
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
+
+
   
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated]);
 
   return (
     <div className="flex justify-center items-center h-screen bg-gradient-to-r from-indigo-500 to-purple-500">

@@ -35,7 +35,7 @@ const App = () => {
         <Route path="/forget" element={<ForgetPassword />} />
         <Route path="/password/reset/:token" element={<ResetPassword />} />
       </Routes>
-      <ToastContainer />
+      <ToastContainer position='top-center' />
     </Router>
   );
 };

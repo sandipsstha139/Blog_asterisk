@@ -10,7 +10,7 @@ import { Op } from "sequelize";
 export const registerUser = CatchAsync(async (req, res, next) => {
   const { username, email, password } = req.body;
 
-  console.log(username, email, password);
+  // console.log(username, email, password);
 
   const checkEmail = await User.findOne({ where: { email } });
   if (checkEmail) {
@@ -18,9 +18,9 @@ export const registerUser = CatchAsync(async (req, res, next) => {
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  console.log(hashedPassword);
+  // console.log(hashedPassword);
   let user = await User.create({ username, email, password: hashedPassword });
-  console.log(user);
+  // console.log(user);
 
   createSendToken(user, "User Registered Successfully", 201, res);
 });
@@ -146,7 +146,7 @@ export const getUser = CatchAsync(async (req, res, next) => {
 });
 
 export const getMe = CatchAsync(async (req, res, next) => {
-  console.log(req.user);
+  // console.log(req.user);
   req.params.id = req.user.dataValues.id;
   next();
 });
