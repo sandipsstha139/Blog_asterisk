@@ -5,9 +5,9 @@ import { useContext, useEffect, useState } from "react";
 import { Context } from "../context/Context";
 import { FaRegUser } from "react-icons/fa";
 import Template from "../components/Template";
-import Blog from '../components/Blog';
-import SubCategory from '../components/SubCategory';
-import Category from '../components/Category';
+import Blog from "../components/Blog";
+import SubCategory from "../components/SubCategory";
+import Category from "../components/Category";
 
 const Homepage = () => {
   const { user, isAuthenticated, setIsAuthenticated } = useContext(Context);
@@ -15,26 +15,31 @@ const Homepage = () => {
   const [showBlog, setShowBlog] = useState(false);
   const [showCategory, setShowCategory] = useState(false);
   const [showSubCategory, setShowSubCategory] = useState(false);
+  const [selectOption, setSelectOption] = useState("Template");
 
   const handleShowTemplate = () => {
+    setSelectOption("Template");
     setShowTemplate(true);
     setShowBlog(false);
     setShowCategory(false);
     setShowSubCategory(false);
   };
   const handleShowBlog = () => {
+    setSelectOption("Blog");
     setShowTemplate(false);
     setShowBlog(true);
     setShowCategory(false);
     setShowSubCategory(false);
   };
   const handleShowCategory = () => {
+    setSelectOption("Category");
     setShowTemplate(false);
     setShowBlog(false);
     setShowCategory(true);
     setShowSubCategory(false);
   };
   const handleShowSubCategory = () => {
+    setSelectOption("Sub-Category");
     setShowTemplate(false);
     setShowBlog(false);
     setShowCategory(false);
@@ -68,7 +73,7 @@ const Homepage = () => {
             Dashboard
           </a>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <h1 className="text-lg capitalize">{user.username}</h1>
           <FaRegUser className="text-2xl text-gray-900 cursor-pointer transition-colors duration-300 hover:text-gray-600" />
@@ -79,25 +84,41 @@ const Homepage = () => {
           <div className="flex flex-col gap-6 px-6">
             <ul className="space-y-6 text-lg ">
               <li
-                className="hover:text-gray-600 transition-colors cursor-pointer"
+                className={`hover:text-gray-600 transition-colors cursor-pointer ${
+                  selectOption === "Template"
+                    ? "bg-purple-400 py-2 px-4 rounded-full"
+                    : ""
+                }`}
                 onClick={handleShowTemplate}
               >
                 Template
               </li>
               <li
-                className="hover:text-gray-600 transition-colors cursor-pointer"
+                className={`hover:text-gray-600 transition-colors cursor-pointer ${
+                  selectOption === "Blog"
+                    ? "bg-purple-400 py-2 px-4 rounded-full"
+                    : ""
+                }`}
                 onClick={handleShowBlog}
               >
                 Blog
               </li>
               <li
-                className="hover:text-gray-600 transition-colors cursor-pointer"
+                className={`hover:text-gray-600 transition-colors cursor-pointer ${
+                  selectOption === "Category"
+                    ? "bg-purple-400 py-2 px-4 rounded-full"
+                    : ""
+                }`}
                 onClick={handleShowCategory}
               >
                 Category
               </li>
               <li
-                className="hover:text-gray-600 transition-colors cursor-pointer whitespace-nowrap"
+                className={`hover:text-gray-600 transition-colors cursor-pointer whitespace-nowrap ${
+                  selectOption === "Sub-Category"
+                    ? "bg-purple-400 py-2 px-4 rounded-full"
+                    : ""
+                }`}
                 onClick={handleShowSubCategory}
               >
                 Sub Category
@@ -119,15 +140,9 @@ const Homepage = () => {
               <Template />
             </div>
           )}
-          {showBlog && (
-            <Blog />
-          )}
-          {showCategory && (
-            <Category />
-          )}
-          {showSubCategory && (
-            <SubCategory />
-          )}
+          {showBlog && <Blog />}
+          {showCategory && <Category />}
+          {showSubCategory && <SubCategory />}
         </main>
       </div>
     </div>
