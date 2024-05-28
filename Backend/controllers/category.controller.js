@@ -1,4 +1,5 @@
 import Category from "../models/category.model.js";
+import Template from '../models/template.model.js';
 import AppError from '../utils/AppError.js';
 import { CatchAsync } from '../utils/catchAsync.js';
 
@@ -12,7 +13,17 @@ export const createCategory = CatchAsync(async (req, res) => {
   });
   
   export const getAllCategory = CatchAsync(async (req, res) => {
-    const categories = await Category.findAll();
+    const categories = await Category.findAll({
+      where: {templateId: req.template},
+      include: [
+        {
+          model: Template,
+          attributes: ["id", "templateName"],
+        },
+      ],
+    });
+
+
   
     res.status(200).json({
       status: "success",

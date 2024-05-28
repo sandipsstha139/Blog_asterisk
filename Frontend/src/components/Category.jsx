@@ -13,23 +13,37 @@ const Category = () => {
   const [updateCategoryId, setUpdateCategoryId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [template, setTemplate] = useState([]);
+  const [selectTemplate, setSelectTemplate] = useState([]);
+
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
+
+
+
+  useEffect(() => {
+     getTemplate();
+    
+  }, []);
+
+  useEffect(() => {
+    if (template.length > 0) {
+      setSelectTemplate(template[0].id);
+    }
+  }, [template]);
 
   useEffect(() => {
     getAllCategory();
-    getTemplate();
-  }, []);
+  }, [selectTemplate]);
 
   const getAllCategory = async () => {
     try {
       setLoading(true);
-      const res = await ApiRequest.get("/34/category");
+      const res = await ApiRequest.get(`/${selectTemplate}/category`);
+      // console.log(res);
       setCategory(res.data.categories);
       setLoading(false);
     } catch (error) {
       console.log(error);
       setLoading(false);
-      toast.error("Failed to fetch categories.");
     }
   };
 
@@ -46,25 +60,28 @@ const Category = () => {
   };
 
   const handleShowCreateCategory = () => {
+    
     setShowCreateCategory(!showCreateCategory);
     setShowUpdateCategory(false);
   };
 
   const handleShowUpdateCategory = (id, name) => {
     setUpdateCategoryId(id);
-    setUpdateCategoryName(name)
+    setUpdateCategoryName(name);
     setShowUpdateCategory(!showUpdateCategory);
     setShowCreateCategory(false);
   };
 
   const handleCreateCategory = async (e) => {
     e.preventDefault();
-    console.log(selectedTemplateId)
     try {
       setLoading(true);
-        const newCategory = await ApiRequest.post(`/${selectedTemplateId}/category`, {
-        categoryName
-      });
+      const newCategory = await ApiRequest.post(
+        `/${selectTemplate}/category`,
+        {
+          categoryName,
+        }
+      );
       setShowCreateCategory(false);
       setCategoryName("");
       setSelectedTemplateId(null);
@@ -82,8 +99,8 @@ const Category = () => {
     try {
       setLoading(true);
       const updatedCategory = await ApiRequest.put(
-        `/${selectedTemplateId}/category/${updateCategoryId}`,
-        { categoryName:updateCategoryName, templateId: selectedTemplateId }
+        `/${selectTemplate}/category/${updateCategoryId}`,
+        { categoryName: updateCategoryName }
       );
       setShowUpdateCategory(false);
       setUpdateCategoryName("");
@@ -92,14 +109,14 @@ const Category = () => {
     } catch (error) {
       console.log(error);
       setLoading(false);
-      toast.error("Failed to update category.");
+      toast.error(error.response.data.message);
     }
   };
 
-  const handleDeleteCategory = async (id) => {
+  const handleDeleteCategory = async (id, templateId) => {
     try {
       setLoading(true);
-      const res = await ApiRequest.delete(`/34/category/${id}`);
+      const res = await ApiRequest.delete(`/${templateId}/category/${id}`);
       setCategory(category.filter((category) => category.id !== id));
       setLoading(false);
       toast.success(res.data.message);
@@ -139,18 +156,20 @@ const Category = () => {
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
             />
-            <select
+            {/* <select
               value={selectedTemplateId || ""}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
               className="mb-4 px-4 py-2 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="" selected>Select a Template</option>
+              <option value="" selected>
+                Select a Template
+              </option>
               {template.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.templateName}
                 </option>
               ))}
-            </select>
+            </select> */}
             <button
               type="submit"
               className="bg-green-500 text-white py-2 px-6 rounded-full hover:bg-green-600 transition duration-300"
@@ -181,18 +200,20 @@ const Category = () => {
               value={updateCategoryName}
               onChange={(e) => setUpdateCategoryName(e.target.value)}
             />
-            <select
+            {/* <select
               value={selectedTemplateId || ""}
               onChange={(e) => setSelectedTemplateId(e.target.value)}
               className="mb-4 px-4 py-2 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
             >
-              <option value="" disabled>Select a Template</option>
+              <option value="" disabled>
+                Select a Template
+              </option>
               {template.map((item) => (
                 <option key={item.id} value={item.id}>
                   {item.templateName}
                 </option>
               ))}
-            </select>
+            </select> */}
             <button
               type="submit"
               className="bg-yellow-500 text-white py-2 px-6 rounded-full hover:bg-yellow-600 transition duration-300"
@@ -204,34 +225,59 @@ const Category = () => {
       )}
 
       {!showCreateCategory && !showUpdateCategory && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div>
           {loading ? (
-            <p className="text-center col-span-full">Loading...</p>
+            <h1 className="flex justify-between items-center font-bold text-3xl">Loading...</h1>
           ) : (
-            category.map((category) => (
-              <div
-                key={category.id}
-                className="bg-white shadow-md rounded-lg overflow-hidden"
-              >
-                <div className="flex items-center justify-center bg-purple-500 p-4 h-24 text-xl font-semibold text-white">
-                  {category.categoryName}
-                </div>
-                <div className="flex justify-between items-center p-4 bg-gray-100">
-                  <button
-                    className="text-purple-600 hover:text-purple-800 transition duration-300"
-                    onClick={() => handleShowUpdateCategory(category.id, category.categoryName)}
+            <div>
+              <ul className="flex flex-row justify-around gap-4 border-4 rounded-full w-[600px] mx-2 mb-5 px-5 py-2">
+                {template.map((item) => (
+                  <li
+                    key={item.id}
+                    onClick={() => setSelectTemplate(item.id)}
+                    className={`cursor-pointer px-4 py-2 rounded-full transition-colors duration-300 ${
+                      selectTemplate === item.id
+                        ? "bg-purple-500 text-white"
+                        : " text-black hover:bg-purple-200"
+                    }`}
                   >
-                    <RxUpdate size={24} />
-                  </button>
-                  <button
-                    className="text-red-600 hover:text-red-800 transition duration-300"
-                    onClick={() => handleDeleteCategory(category.id)}
+                    {item.templateName}
+                  </li>
+                ))}
+              </ul>
+
+              <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+                {category.map((category) => (
+                  <div
+                    key={category.id}
+                    className="bg-white shadow-md rounded-lg overflow-hidden"
                   >
-                    <FiDelete size={24} />
-                  </button>
-                </div>
+                    <div className="flex items-center justify-center bg-purple-500 p-4 h-24 text-xl font-semibold text-white">
+                      {category.categoryName}
+                    </div>
+                    <div className="flex justify-between items-center p-4 bg-gray-100">
+                      <button
+                        className="text-purple-600 hover:text-purple-800 transition duration-300"
+                        onClick={() =>
+                          handleShowUpdateCategory(
+                            category.id,
+                            category.categoryName
+                          )
+                        }
+                      >
+                        <RxUpdate size={24} />
+                      </button>
+                      <button
+                        className="text-red-600 hover:text-red-800 transition duration-300"
+                        onClick={() => handleDeleteCategory(category.id, category.Template.id)}
+                      >
+                        <FiDelete size={24} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))
+            </div>
           )}
         </div>
       )}

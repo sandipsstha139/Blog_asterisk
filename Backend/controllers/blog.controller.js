@@ -2,6 +2,7 @@ import Blog from '../models/blog.model.js';
 import { CatchAsync } from '../utils/catchAsync.js';
 
 export const createBlog = CatchAsync(async (req, res, next) => {
+
       const blog = {
       blogName: req.body.blogName,
       ...req.obj,

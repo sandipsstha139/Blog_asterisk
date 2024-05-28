@@ -6,8 +6,11 @@ import {
   updateSubCategory,
   getAllSubCategory,
 } from "../controllers/subcategory.controller.js";
+import { verifyCategory, verifyTemplate } from '../middlewares/verification.js';
 
 const router = express.Router();
+
+router.use(verifyTemplate, verifyCategory);
 
 router.route("/").get(getAllSubCategory).post(createSubCategory);
 router

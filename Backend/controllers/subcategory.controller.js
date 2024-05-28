@@ -1,5 +1,6 @@
+import Category from "../models/category.model.js";
 import SubCategory from "../models/subCategory.model.js";
-import Template from '../models/template.model.js';
+import Template from "../models/template.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
 
@@ -14,10 +15,15 @@ export const createSubCategory = CatchAsync(async (req, res) => {
 
 export const getAllSubCategory = CatchAsync(async (req, res) => {
   const subCategories = await SubCategory.findAll({
+    where: { templateId: req.template, categoryId: req.category },
     include: {
-      model: Template,
-      attributes: ["id", "templateName"]
-    }
+      model: Category,
+      attributes: ["id", "categoryName"],
+      include: {
+        model: Template,
+        attributes: ["id", "templateName"],
+      },
+    },
   });
 
   res.status(200).json({
@@ -49,7 +55,7 @@ export const updateSubCategory = CatchAsync(async (req, res) => {
     return next(new AppError("Sub Category not found!", 404));
   }
 
-  const updatedSubcategory = await SubCategory.update(req.body);
+  const updatedSubcategory = await subCategory.update(req.body);
   res.status(200).json({
     status: "success",
     message: "SubCategory Updated Successfully",

@@ -1,4 +1,6 @@
 import Blog from "../models/blog.model.js";
+import Category from '../models/category.model.js';
+import SubCategory from '../models/subCategory.model.js';
 import Template from "../models/template.model.js";
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from '../utils/catchAsync.js';
@@ -16,9 +18,14 @@ export const createTemplate = CatchAsync(async (req, res, next) => {
 export const getAllTemplates = CatchAsync(async (req, res, next) => {
   const templates = await Template.findAll({
     include: {
-      model: Blog,
-      attributes: ["id", "blogName"],
-    },
+      model: Category,
+      attributes: ["id", "categoryName" ],
+      include: {
+        model: SubCategory,
+        attributes: ['id', "subCategoryName"]
+      }
+    }
+    
   });
   res.status(200).json({
     status: "success",
