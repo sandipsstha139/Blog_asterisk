@@ -1,4 +1,5 @@
 import SubCategory from "../models/subCategory.model.js";
+import Template from '../models/template.model.js';
 import AppError from "../utils/AppError.js";
 import { CatchAsync } from "../utils/catchAsync.js";
 
@@ -12,7 +13,12 @@ export const createSubCategory = CatchAsync(async (req, res) => {
 });
 
 export const getAllSubCategory = CatchAsync(async (req, res) => {
-  const subCategories = await SubCategory.findAll();
+  const subCategories = await SubCategory.findAll({
+    include: {
+      model: Template,
+      attributes: ["id", "templateName"]
+    }
+  });
 
   res.status(200).json({
     status: "success",

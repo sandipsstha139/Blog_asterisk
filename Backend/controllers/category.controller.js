@@ -38,12 +38,13 @@ export const createCategory = CatchAsync(async (req, res) => {
   
   export const updateCategory = CatchAsync(async (req, res) => {
     const category = await Category.findByPk(req.params.id);
+    // console.log(req.params.id)
   
     if (!category) {
       return next(new AppError("Category not found!", 404));
     }
   
-    const updatedCategory = await Category.update(req.body);
+    const updatedCategory = await category.update(req.body);
     res.status(200).json({
       status: "success",
       message: "category Updated Successfully",

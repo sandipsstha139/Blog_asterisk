@@ -97,7 +97,7 @@ const Homepage = () => {
                 Category
               </li>
               <li
-                className="hover:text-gray-600 transition-colors cursor-pointer"
+                className="hover:text-gray-600 transition-colors cursor-pointer whitespace-nowrap"
                 onClick={handleShowSubCategory}
               >
                 Sub Category

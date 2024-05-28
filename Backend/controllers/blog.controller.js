@@ -1,8 +1,8 @@
+import Blog from '../models/blog.model.js';
 import { CatchAsync } from '../utils/catchAsync.js';
 
 export const createBlog = CatchAsync(async (req, res, next) => {
-
-    const blog = {
+      const blog = {
       blogName: req.body.blogName,
       ...req.obj,
       sections: req.body.sections,
@@ -26,6 +26,7 @@ export const createBlog = CatchAsync(async (req, res, next) => {
 export const testController = CatchAsync(async (req, res, next) => {
     const {blogName} = req.body;
     console.log(req.body);
+    console.log(req.files)
     res.json({
         status: "success",
         data: {
