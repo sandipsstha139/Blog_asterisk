@@ -1,142 +1,94 @@
-import Blog from '../models/blog.model.js';
-import { CatchAsync } from '../utils/catchAsync.js';
+import Blog from "../models/blog.model.js";
+import Category from '../models/category.model.js';
+import SubCategory from "../models/subCategory.model.js";
+import Template from "../models/template.model.js";
+import AppError from "../utils/AppError.js";
+import { CatchAsync } from "../utils/catchAsync.js";
 
 export const createBlog = CatchAsync(async (req, res, next) => {
+  const blog = {
+    blogName: req.body.blogName,
+    ...req.obj,
+    sections: req.body.sections,
+  };
+  console.log(blog);
+  const sectionsData = JSON.parse(blog.sections).map((value, i) => {
+    const { name, text } = value;
+    const image = `localhost:3000/${req.files[i].filename}`;
+    return { name, text, image };
+  });
+  blog.sections = sectionsData;
 
-      const blog = {
-      blogName: req.body.blogName,
-      ...req.obj,
-      sections: req.body.sections,
-    };
-    console.log(blog)
-    const sectionsData = JSON.parse(blog.sections).map((value, i) => {
-      const { name, text } = value;
-      const image = `localhost:3000/${req.files[i].filename}`;
-      return { name, text, image };
-    });
-    blog.sections = sectionsData;
- 
-      const newBlog = await Blog.create(blog);
-      res.json({
-        success: true,
-        message: "Blog Created Successfully",
-        newBlog,
-      })
+  const newBlog = await Blog.create(blog);
+  res.json({
+    success: true,
+    message: "Blog Created Successfully",
+    newBlog,
+  });
 });
 
-export const testController = CatchAsync(async (req, res, next) => {
-    const {blogName} = req.body;
-    console.log(req.body);
-    console.log(req.files)
-    res.json({
-        status: "success",
-        data: {
-            "form_data": blogName
-        }
-        
-    })
+export const getAllBlogs = CatchAsync(async (req, res, next) => {
+  const blogs = await Blog.findAll({
+    include: {
+      model: SubCategory,
+      attributes: ["id", "subCategoryName"],
+      include: {
+        model: Category,
+        attributes: ["id", "categoryName"],
+        include: {
+          model: Template,
+          attributes: ["id", "templateName"],
+        },
+      },
+    },
+  });
+  res.status(200).json({
+    status: "success",
+    results: blogs.length,
+    message: "blogs Fetched successfully",
+    blogs: blogs,
+  });
 });
 
-// export const createBlog = async (req, res) => {
-//   const blog = {
-//     blogName: req.body.blogName,
-//     ...req.obj,
-//     sections: req.body.sections,
-//   };
-//   const sectionsData = JSON.parse(blog.sections).map((value, i) => {
-//     const { name, text } = value;
-//     const image = `localhost:8000/${req.files[i].filename}`;
-//     return { name, text, image };
-//   });
-//   blog.sections = sectionsData;
-//   // console.log(blog);
-//   try {
-//     const _blog = await Blog.create(blog);
-//     res.json({
-//       success: true,
-//       message: "Blog Created Successfully",
-//       _blog,
-//     });
-//   } catch (error) {
-//     res.json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
+export const getBlog = CatchAsync(async (req, res, next) => {
+  const blog = await Blog.findByPk(req.params.id);
 
-// export const readBlog = async (req, res) => {
-//   try {
-//     const blogs = await Blog.findAll();
-//     res.json({
-//       success: true,
-//       message: "blogs read successfully",
-//       blogs: blogs,
-//     });
-//   } catch (error) {
-//     res.json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
+  if (!blog) {
+    return next(new AppError("Blog not Found with that ID!", 404));
+  }
 
-// export const getBlogID = async (req, res) => {
-//   try {
-//     const blog = await Blog.findByPk(req.params.id);
-//     if (blog) {
-//       res.json({
-//         success: true,
-//         message: "blog found successfully ",
-//         result: blog,
-//       });
-//     } else {
-//       res.json({
-//         success: false,
-//         message: "Blog not found",
-//       });
-//     }
-//   } catch (error) {
-//     res.json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
+  res.json({
+    status: "success",
+    message: "blog Fetched successfully ",
+    result: blog,
+  });
+});
 
-// export const updateBlog = async (req, res) => {
-//   try {
-//     const blog = await Blog.findByPk(req.params.id);
-//     if (blog) {
-//       await blog.update(req.body);
-//       res.json({
-//         success: true,
-//         message: "blog updated successfully ",
-//       });
-//     }
-//   } catch (error) {
-//     res.json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
+export const updateBlog = CatchAsync(async (req, res, next) => {
+  const blog = await Blog.findByPk(req.params.id);
 
-// export const deleteBlog = async (req, res) => {
-//   try {
-//     const blog = await Blog.findByPk(req.params.id);
-//     console.log(blog);
-//     if (blog) {
-//       await blog.destroy();
-//       res.json({
-//         success: true,
-//         message: "blog deleted successfully",
-//       });
-//     }
-//   } catch (error) {
-//     res.json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
+  if (!blog) {
+    return next(new AppError("Blog not Found with that ID!", 404));
+  }
+
+  console.log(req.body);
+  const updatedBlog = await blog.update(req.body);
+  res.status(200).json({
+    status: "success",
+    message: "Blog updated successfully",
+    updatedBlog,
+  });
+});
+export const deleteBlog = CatchAsync(async (req, res) => {
+  const blog = await Blog.findByPk(req.params.id);
+
+  if (!blog) {
+    return next(new AppError("Blog not Found with that ID!", 404));
+  }
+  await blog.destroy();
+
+  res.status(200).json({
+    status: "success",
+    message: "Blog Deleted successfully ",
+  });
+});

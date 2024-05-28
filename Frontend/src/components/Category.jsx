@@ -200,20 +200,7 @@ const Category = () => {
               value={updateCategoryName}
               onChange={(e) => setUpdateCategoryName(e.target.value)}
             />
-            {/* <select
-              value={selectedTemplateId || ""}
-              onChange={(e) => setSelectedTemplateId(e.target.value)}
-              className="mb-4 px-4 py-2 border rounded-md w-full focus:outline-none focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="" disabled>
-                Select a Template
-              </option>
-              {template.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.templateName}
-                </option>
-              ))}
-            </select> */}
+
             <button
               type="submit"
               className="bg-yellow-500 text-white py-2 px-6 rounded-full hover:bg-yellow-600 transition duration-300"
